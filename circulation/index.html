@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05080f">
+<title>Circulation générale · la Terre en 3D</title>
+<meta name="description" content="Comprendre la circulation générale de l'atmosphère sur un globe 3D interactif : ZCIT, cellules de Hadley, alizés, jets, drainage polaire, ondes de Rossby.">
+<style>
+:root{--bg:#05080f;--glass:rgba(12,18,32,.78);--glass2:rgba(20,29,50,.9);--line:rgba(140,170,230,.16);--txt:#eaf0fb;--dim:#93a1bd;
+  --amber:#ffc35c;--cyan:#5fd6ff;--pink:#ff6fc8;--red:#ff6a4d;--blue:#5aa2ff;--green:#62e3a0;--violet:#b48cff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+/* ---------- haut */
+#top{position:fixed;left:14px;top:calc(10px + env(safe-area-inset-top));display:flex;gap:8px;align-items:center;flex-wrap:wrap;z-index:5;pointer-events:none;max-width:calc(100% - 28px)}
+#top>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:9px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:7px 12px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.brand b{font-size:14px;letter-spacing:.01em}.brand span{color:var(--dim);font-size:12px}
+.brand i{width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#9fd3ff,#2b6bd6);box-shadow:0 0 10px #3d8bff}
+.chip{background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12.5px;color:var(--txt);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);white-space:nowrap}
+.chip.warn{border-color:rgba(255,195,92,.45);color:var(--amber)}
+#legend{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:4;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+#legend .lg{background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--dim);display:flex;gap:9px;align-items:center;flex-wrap:wrap;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#legend .lg b{color:var(--txt);font-weight:600;margin-right:2px}
+.sw{display:inline-flex;align-items:center;gap:5px}.sw:before{content:"";width:16px;height:4px;border-radius:3px;background:var(--c)}
+/* ---------- panneau */
+#panel{position:fixed;z-index:6;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+@media (min-width:761px){#panel{right:14px;top:14px;bottom:14px;width:410px;border-radius:20px}#grab{display:none}}
+@media (max-width:760px){#panel{left:0;right:0;bottom:0;height:47vh;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom);transition:height .35s cubic-bezier(.2,.8,.2,1)}
+  #panel.min{height:calc(118px + env(safe-area-inset-bottom))}#legend{display:none}}
+#grab{height:22px;display:flex;justify-content:center;align-items:center;cursor:pointer;flex:0 0 auto}
+#grab:before{content:"";width:42px;height:5px;border-radius:5px;background:rgba(255,255,255,.28)}
+.tabs{display:flex;gap:4px;padding:10px 12px 8px;flex:0 0 auto}
+.tabs button{flex:1;background:transparent;border:1px solid transparent;color:var(--dim);font:600 13.5px/1 inherit;padding:9px 6px;border-radius:11px;cursor:pointer}
+.tabs button.on{background:rgba(255,255,255,.08);border-color:var(--line);color:var(--txt)}
+.view{display:none;flex:1;overflow:auto;padding:4px 16px 16px;overscroll-behavior:contain}
+.view.on{display:block}
+/* cours */
+.stephead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
+.stepnum{font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.05em}
+.dots{display:flex;gap:4px;flex-wrap:wrap}.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer}.dots i.on{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}.dots i.done{background:rgba(95,214,255,.45)}
+h2{font-size:21px;line-height:1.2;margin:0 0 6px}
+.en{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 10px}.en span{font-size:11.5px;color:#cfe0ff;background:rgba(90,162,255,.13);border:1px solid rgba(90,162,255,.3);border-radius:6px;padding:2px 7px}
+.en span:before{content:"EN · ";color:var(--dim)}
+.body p{margin:0 0 10px}.body ul,.body ol{margin:0 0 10px;padding-left:20px}.body li{margin:3px 0}.body ol.tight li{margin:1px 0}
+.body .formula{text-align:center;font:600 16px/1.4 ui-monospace,Menlo,monospace;background:rgba(255,255,255,.05);border-radius:10px;padding:8px;color:var(--amber)}
+.body .def{background:rgba(255,195,92,.08);border:1px solid rgba(255,195,92,.25);border-radius:10px;padding:8px 10px;font-size:14px}
+.keep{background:rgba(98,227,160,.07);border:1px solid rgba(98,227,160,.28);border-radius:12px;padding:9px 12px;margin:12px 0 4px}
+.keep h4{margin:0 0 4px;font-size:12px;letter-spacing:.06em;color:var(--green)}.keep ul{margin:0;padding-left:18px}.keep li{font-size:13.5px;margin:2px 0}
+.nav{display:flex;gap:8px;padding:10px 16px 14px;flex:0 0 auto;border-top:1px solid var(--line)}
+.btn{background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--txt);font:600 14px/1 inherit;padding:12px 14px;border-radius:12px;cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.11)}.btn.pri{background:linear-gradient(180deg,#3f8cff,#2a64d8);border-color:#5b9bff;flex:1}.btn:disabled{opacity:.35}
+.kw{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}.kw button{background:rgba(90,162,255,.12);border:1px solid rgba(90,162,255,.32);color:var(--txt);border-radius:9px;padding:7px 9px;font:13px/1.25 inherit;cursor:pointer;text-align:left}
+.kw button small{display:block;color:var(--dim);font-size:11.5px}
+canvas#chart{width:100%;height:170px;display:none;margin:4px 0 8px;border-radius:12px;background:rgba(255,255,255,.035)}
+/* explorer */
+.grp{margin:4px 0 14px}.grp h3{font-size:12px;letter-spacing:.07em;color:var(--dim);margin:0 0 7px;font-weight:700}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+.tg{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:8px 10px;font:600 13px/1 inherit;cursor:pointer;display:flex;align-items:center;gap:7px}
+.tg:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c,#888);opacity:.35}
+.tg.on{color:var(--txt);background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}.tg.on:before{opacity:1;box-shadow:0 0 8px var(--c)}
+.seg{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px}
+.seg button{flex:1;background:transparent;border:0;color:var(--dim);font:600 13px/1 inherit;padding:9px 6px;border-radius:8px;cursor:pointer}.seg button.on{background:rgba(255,255,255,.12);color:var(--txt)}
+.rng{display:flex;align-items:center;gap:10px}.rng input{flex:1;accent-color:#4d95ff}.rng output{min-width:118px;text-align:right;font-size:13px;color:var(--txt)}
+.months{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);margin-top:2px;padding:0 2px}
+.tool{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn.act{background:linear-gradient(180deg,#ffb84d,#f08c1a);border-color:#ffc56b;color:#1a1000}
+.hint{font-size:12.5px;color:var(--dim);margin:6px 0 0}
+/* quiz */
+.qcard h3{font-size:17px;margin:4px 0 12px;line-height:1.3}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opts button{text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:11px 12px;font:14px/1.35 inherit;cursor:pointer}
+.opts button.ok{border-color:var(--green);background:rgba(98,227,160,.14)}.opts button.ko{border-color:var(--red);background:rgba(255,106,77,.13)}
+.expl{margin:12px 0 0;font-size:14px;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}
+.qtop{display:flex;justify-content:space-between;color:var(--dim);font-size:12.5px;font-weight:600}
+.qbtns{display:flex;gap:8px;margin-top:12px}
+/* bulle d'info + démo */
+#info{position:fixed;z-index:5;left:50%;transform:translateX(-50%);top:calc(58px + env(safe-area-inset-top));background:var(--glass2);border:1px solid var(--line);border-radius:14px;padding:8px 13px;font-size:13px;display:none;max-width:min(560px,calc(100% - 24px));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#info b{color:#fff}#info .k{color:var(--dim)}
+@media (min-width:761px){#info{left:calc((100% - 424px)/2)}}
+#demo{position:fixed;z-index:5;top:calc(58px + env(safe-area-inset-top));left:14px;background:var(--glass2);border:1px solid rgba(255,195,92,.35);border-radius:16px;padding:10px 14px;display:none;min-width:230px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#demo .big{font:700 30px/1.1 ui-monospace,Menlo,monospace;color:var(--amber)}#demo .sm{font-size:12.5px;color:var(--dim)}
+#demo .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin:6px 0 2px;overflow:hidden}#demo .bar i{display:block;height:100%;background:linear-gradient(90deg,#62e3a0,#ffc35c,#ff6a4d);width:0}
+@media (max-width:760px){#demo{top:auto;bottom:calc(47vh + 10px);left:10px;min-width:0;padding:7px 11px}#demo .big{font-size:22px}}
+#loading{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .6s}
+#loading .orb{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#a9d8ff,#2c6be0 55%,#0b1d44);box-shadow:0 0 40px #2f7bff;animation:sp 2.2s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading p{color:var(--dim);margin:0;font-size:14px}
+#err{display:none;position:fixed;inset:0;z-index:30;background:var(--bg);align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--dim)}
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" aria-label="Globe 3D interactif"></canvas>
+<div id="top">
+  <div class="brand"><i></i><b>Circulation générale</b><span>MÉTÉO 050</span></div>
+  <div class="chip" id="mchip">Avril</div>
+  <div class="chip warn" id="rchip" style="display:none">Terre sans rotation</div>
+</div>
+<div id="info"></div>
+<div id="demo"><div class="sm">Anneau d'air parti de l'équateur</div><div class="big" id="dkt">0 kt</div><div class="bar"><i id="dbar"></i></div><div class="sm" id="dtxt">latitude 0° · r = R</div></div>
+<div id="legend"></div>
+
+<div id="panel">
+  <div id="grab" title="Agrandir / réduire"></div>
+  <div class="tabs"><button data-t="cours" class="on">Cours</button><button data-t="explore">Explorer</button><button data-t="quiz">Quiz</button></div>
+  <div class="view on" id="v-cours">
+    <div class="stephead"><span class="stepnum" id="snum"></span><div class="dots" id="dots"></div></div>
+    <h2 id="stitle"></h2>
+    <div class="en" id="sen"></div>
+    <canvas id="chart" width="760" height="340"></canvas>
+    <div class="body" id="sbody"></div>
+    <div class="keep" id="skeep"><h4>À RETENIR</h4><ul></ul></div>
+  </div>
+  <div class="view" id="v-explore">
+    <div class="grp"><h3>COUCHES</h3><div class="toggles" id="tgs"></div></div>
+    <div class="grp"><h3>PLANÈTE</h3><div class="seg" id="segw"><button data-w="0" class="on">Terre réelle</button><button data-w="1">Couverte d'eau (modèle)</button></div></div>
+    <div class="grp"><h3>MOIS</h3><div class="rng"><input type="range" id="rm" min="0" max="11.99" step="0.01" value="3.7"><output id="om"></output></div>
+      <div class="months"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div></div>
+    <div class="grp"><h3>ROTATION DE LA TERRE</h3><div class="rng"><input type="range" id="rr" min="0" max="1" step="0.01" value="1"><output id="or"></output></div>
+      <p class="hint">À 0 %, il n'y a plus qu'une cellule par hémisphère. Monte doucement pour voir naître les 3 zones.</p></div>
+    <div class="grp"><h3>BULLE D'AIR</h3><div class="tool"><button class="btn" id="btool">🎈 Lâcher une bulle</button>
+      <div class="seg" id="segz" style="min-width:170px"><button data-z="0.04" class="on">Au sol</button><button data-z="0.8">En altitude</button></div>
+      <button class="btn" id="bclear">Effacer</button></div>
+      <p class="hint" id="thint">Active l'outil puis touche le globe : la bulle suit le vent en 3D (elle monte, descend, est déviée).</p></div>
+    <div class="grp"><h3>ANIMATION</h3><div class="rng"><input type="range" id="rs" min="0.2" max="3" step="0.05" value="1"><output id="os"></output></div>
+      <div class="toggles" style="margin-top:8px"><button class="tg" id="tauto" style="--c:#b48cff">Caméra qui tourne</button></div></div>
+  </div>
+  <div class="view" id="v-quiz"><div id="quiz"></div></div>
+  <div class="nav" id="nav"><button class="btn" id="bprev">◀</button><button class="btn pri" id="bnext">Suivant ▶</button></div>
+</div>
+
+<div id="loading"><div class="orb"></div><p>Chargement de la Terre…</p></div>
+<div id="err"><div><p style="font-size:17px;color:#fff">Ton appareil n'arrive pas à afficher la 3D (WebGL).</p><p>Essaie avec Safari ou Chrome à jour.</p></div></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
